@@ -11,8 +11,8 @@ import sys
 import time
 import commands
 
-host = '127.0.0.1'
-port = 23454
+host = '10.242.11.216'
+port = 23456
 backlog = 5
 size = 1024
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,7 +42,7 @@ while running:
             data = s.recv(size)
             if data:
                 s.send(data)
-                commands.getstatusoutput('say -v Zarvox %s' % ''.join(data))
+                commands.getstatusoutput('say -v Zarvox %s' % ''.join(data.strip()))
                 time.sleep(0.5)
                 print data
             else:
