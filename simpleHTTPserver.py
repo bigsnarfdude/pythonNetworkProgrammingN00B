@@ -9,7 +9,7 @@ class Server:
     def __init__(self, port=8888):
         self.host = ''  
         self.port = port
-        self.www_directory = 'www' 
+        self.www_directory = '/Users/antigen/dev/pythonNetworkProgrammingN00B/' 
 
     def activate_server(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,20 +34,26 @@ class Server:
     def _wait_for_connections(self):
         while True:
             print "Awaiting Victims\n\n"
-            self.socket.listen(1)
+            self.socket.listen(2)
 
             conn, addr = self.socket.accept()
             print "Got connection from: ", addr
             print "*********************************************"
             data = conn.recv(1024)
-            string = bytes.decode(data)
+            request_string = bytes.decode(data)
+            
 
-            request_method = string.split(' ')[0]
+            print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+            print repr(request_string)
+            print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+
+
+            request_method = request_string.split(' ')[0]
             print "Method: ", request_method
-            print "Request body: ", string
+            print "Request body: ", request_string
 
             if (request_method == 'GET') | (request_method == 'HEAD'):
-                file_requested = string.split(' ')
+                file_requested = request_string.split(' ')
                 file_requested = file_requested[1]
 
                 file_requested = file_requested.split('?')[0]
@@ -66,7 +72,7 @@ class Server:
 
                     response_headers = self._generate_headers( 200)
 
-                except Exception as e: #in case file was not found, generate 404 page
+                except Exception as e:
                     print "Warning, file not found. Serving response code 404\n", e
                     response_headers = self._generate_headers( 404)
 
