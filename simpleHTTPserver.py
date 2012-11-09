@@ -71,7 +71,7 @@ class Server:
                     response_headers = self._generate_headers( 404)
 
                     if (request_method == 'GET'):
-                        response_content = b"<html><body><p>Error 404: File not found</p><p>Python HTTP server</p></body></html>"
+                        response_content = b"<html><body><p>Error 404: File not found</p><p>Vincent's Crap HTTP server</p></body></html>"
 
                 server_response =  response_headers.encode()
                 if (request_method == 'GET'):

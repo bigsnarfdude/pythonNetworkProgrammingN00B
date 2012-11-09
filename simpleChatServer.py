@@ -11,8 +11,8 @@ import sys
 import time
 import commands
 
-host = '10.242.11.216'
-port = 23456
+host = ''
+port = 1235
 backlog = 5
 size = 1024
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
