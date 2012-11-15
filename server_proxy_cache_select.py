@@ -5,23 +5,24 @@ import urllib2
 
 HOST = ''
 PORT = 8888
-backlog = 5
-size = 1024
+BACKLOG = 5
+SIZE = 1024
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind ((HOST, PORT))
-server.listen(backlog)
+server.listen(BACKLOG)
 input = [server, sys.stdin]
-running = 1
+running = True 
 
 cache = {}
 
 def get_webpage(url):
     result = urllib2.urlopen(url).read()
     cache[url] = result
+    
     return result
 
-while running:
+while running: # simple select reactor
     inputready, outputready, exceptready = select.select(input, [], []) 
     
     for s in inputready:
@@ -32,21 +33,19 @@ while running:
 
         elif s == sys.stdin:
             junk = sys.stdin.readline()
-            running = 0
+            running = False 
 
         else:
-            data = s.recv(size)
-            if data:
-                if "http://" in data:
-                    url = data.strip()
-                    if url in cache:
-                        print "fetched from cache"
-                        data_to_client = cache[url]
-                        s.send(data_to_client)
-                    else:
-                        print "going to the interweb"
-                        data_to_client = get_webpage(url)
-                        s.send(data_to_client)
+            data = s.recv(SIZE)
+            if data and data.startswith("http://"):
+                url = data.strip()
+                if url in cache:
+                    print "fetched from cache"
+                    data_to_client = cache[url]
+                else:
+                    print "going to the interweb"
+                    data_to_client = get_webpage(url)
+                    s.send(data_to_client)
             else:
                 s.close()
                 input.remove(s)
