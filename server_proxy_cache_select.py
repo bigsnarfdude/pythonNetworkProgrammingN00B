@@ -9,22 +9,23 @@ BACKLOG = 5
 SIZE = 1024
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind ((HOST, PORT))
+server.bind((HOST, PORT))
 server.listen(BACKLOG)
 input = [server, sys.stdin]
-running = True 
+running = True
 
 cache = {}
+
 
 def get_webpage(url):
     result = urllib2.urlopen(url).read()
     cache[url] = result
-    
+
     return result
 
 while running: # simple select reactor
-    inputready, outputready, exceptready = select.select(input, [], []) 
-    
+    inputready, outputready, exceptready = select.select(input, [], [])
+
     for s in inputready:
 
         if s == server:
@@ -33,7 +34,7 @@ while running: # simple select reactor
 
         elif s == sys.stdin:
             junk = sys.stdin.readline()
-            running = False 
+            running = False
 
         else:
             data = s.recv(SIZE)
