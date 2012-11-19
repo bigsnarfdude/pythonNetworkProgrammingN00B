@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 import socket  
-import signal 
 import time  
+
+PORT = 8080
 
 class Server:
 
-    def __init__(self, port=8888):
+    def __init__(self, port=PORT):
         self.host = ''  
         self.port = port
         self.www_directory = '/Users/antigen/dev/pythonNetworkProgrammingN00B/' 
@@ -15,9 +16,6 @@ class Server:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.host, self.port))
         self._wait_for_connections()
-
-    def shutdown(self):
-        s.socket.shutdown(socket.SHUT_RDWR)
 
     def _generate_headers(self, code):
         h = ''
@@ -52,13 +50,13 @@ class Server:
             print "Method: ", request_method
             print "Request body: ", request_string
 
-            if (request_method == 'GET') | (request_method == 'HEAD'):
+            if request_method == 'GET' or request_method == 'HEAD':
                 file_requested = request_string.split(' ')
                 file_requested = file_requested[1]
 
                 file_requested = file_requested.split('?')[0]
 
-                if (file_requested == '/'):
+                if file_requested == '/':
                     file_requested = '/index.html'
 
                 file_requested = self.www_directory + file_requested
@@ -66,21 +64,21 @@ class Server:
 
                 try:
                     file_handler = open(file_requested,'rb')
-                    if (request_method == 'GET'):
+                    if request_method == 'GET':
                         response_content = file_handler.read()
                     file_handler.close()
 
-                    response_headers = self._generate_headers( 200)
+                    response_headers = self._generate_headers(200)
 
                 except Exception as e:
                     print "Warning, file not found. Serving response code 404\n", e
-                    response_headers = self._generate_headers( 404)
+                    response_headers = self._generate_headers(404)
 
-                    if (request_method == 'GET'):
+                    if request_method == 'GET':
                         response_content = b"<html><body><p>Error 404: File not found</p><p>Vincent's Crap HTTP server</p></body></html>"
 
                 server_response =  response_headers.encode()
-                if (request_method == 'GET'):
+                if request_method == 'GET':
                     server_response +=  response_content
 
                 conn.send(server_response)
@@ -90,13 +88,7 @@ class Server:
         else:
             print "Unknown HTTP request method:", request_method
 
-def graceful_shutdown(sig, dummy):
-    s.shutdown()
-    import sys
-    sys.exit(1)
-
-signal.signal(signal.SIGINT, graceful_shutdown)
 print "Starting web server\n\n"
 
-s = Server(8888)
+s = Server()
 s.activate_server()
