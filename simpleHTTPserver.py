@@ -1,33 +1,33 @@
 #!/usr/bin/env python
 
-import socket  
-import time  
+import socket
+import time
 
-PORT = 8080
 
 class Server:
 
-    def __init__(self, port=PORT):
-        self.host = ''  
+    def __init__(self, port):
+        self.host = ''
         self.port = port
-        self.www_directory = '/Users/antigen/dev/pythonNetworkProgrammingN00B/' 
+        self.proxy_request = ''
+        self.www_directory = '/Users/antigen/dev/pythonNetworkProgrammingN00B/'
 
-    def activate_server(self):
+    def start_server(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.host, self.port))
         self._wait_for_connections()
 
     def _generate_headers(self, code):
-        h = ''
+        header = ''
         if (code == 200):
-            h = 'HTTP/1.1 200 OK\n'
+            header = 'HTTP/1.1 200 OK\n'
         elif(code == 404):
-            h = 'HTTP/1.1 404 Not Found\n'
+            header = 'HTTP/1.1 404 Not Found\n'
         current_date = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
-        h += 'Date: ' + current_date +'\n'
-        h += 'Server: Crap-Server\n'
-        h += 'Connection: close\n\n'  
-        return h
+        header += 'Date: ' + current_date + '\n'
+        header += 'Server: Crap-Server\n'
+        header += 'Connection: close\n\n'
+        return header
 
     def _wait_for_connections(self):
         while True:
@@ -39,7 +39,6 @@ class Server:
             print "*********************************************"
             data = conn.recv(1024)
             request_string = bytes.decode(data)
-            
 
             print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
             print repr(request_string)
@@ -54,16 +53,26 @@ class Server:
                 file_requested = request_string.split(' ')
                 file_requested = file_requested[1]
 
-                file_requested = file_requested.split('?')[0]
+                get_request = file_requested.split('?')[0]
 
-                if file_requested == '/':
-                    file_requested = '/index.html'
+                if get_request == '/':
+                    get_request = '/index.html'
 
-                file_requested = self.www_directory + file_requested
-                print "Serving web page [",file_requested,"]"
+                if "http://" in file_requested:
+                    self.proxy_request = file_requested.split('?')[1]
 
-                try:
-                    file_handler = open(file_requested,'rb')
+                get_request = self.www_directory + file_requested
+                print "Serving web page [", get_request, "]"
+
+                if self.proxy_request.startswith("http://"):
+                    ####
+                    # call proxy server
+                    ####
+                    print "proxy request requested"
+                    print repr(self.proxy_request)
+
+                try: # can this be handled WITH call??
+                    file_handler = open(file_requested, 'rb')
                     if request_method == 'GET':
                         response_content = file_handler.read()
                     file_handler.close()
@@ -77,9 +86,9 @@ class Server:
                     if request_method == 'GET':
                         response_content = b"<html><body><p>Error 404: File not found</p><p>Vincent's Crap HTTP server</p></body></html>"
 
-                server_response =  response_headers.encode()
+                server_response = response_headers.encode()
                 if request_method == 'GET':
-                    server_response +=  response_content
+                    server_response += response_content
 
                 conn.send(server_response)
                 print "Closing connection with client"
@@ -90,5 +99,5 @@ class Server:
 
 print "Starting web server\n\n"
 
-s = Server()
-s.activate_server()
+s = Server(8080)
+s.start_server()
